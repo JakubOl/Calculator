@@ -7,7 +7,6 @@ const clearButton = document.querySelector("#clear");
 const deleteButton = document.querySelector("#delete");
 const operation = document.querySelectorAll(".operation");
 const equal = document.querySelector(".equal");
-let pressedButton;
 let number = [];
 let numbers = [];
 let operator;
@@ -15,8 +14,9 @@ let result;
 
 buttons.forEach((button) =>
   button.addEventListener("click", function (e) {
-    console.log(number, numbers);
+    if (e.target.id === "." && number.includes(".")) return;
     if (e.target.classList.contains("number")) number.push(e.target.id);
+    console.log(typeof (+number.join("")).toFixed(3));
     resultDisplay.textContent = number.join("");
   })
 );
@@ -48,8 +48,22 @@ function divide(num1, num2) {
 }
 
 operation.forEach(function (op) {
-  if (!number) return;
   op.addEventListener("click", function (e) {
+    if (!number) return;
+    numbers.push(number.join(""));
+    number = [];
+    console.log(number, numbers);
+    if (numbers.length > 1) {
+      if (operator === divide && numbers[1] === "0") {
+        number = [];
+        numbers = [];
+        return (resultDisplay.textContent = "0 Division");
+      }
+      result = operator(...numbers);
+      resultDisplay.textContent = (+result).toFixed(3);
+      numbers = [];
+      numbers[0] = result;
+    }
     switch (e.target.id) {
       case "/":
         operator = divide;
@@ -63,18 +77,20 @@ operation.forEach(function (op) {
       case "+":
         operator = add;
         break;
-      // case '=': operator = equal;break;
     }
-    numbers.push(number.join(""));
-    number = [];
-    resultDisplay.textContent = number.join("");
   });
 });
 
 equal.addEventListener("click", function () {
+  if (!numbers[0]) return (resultDisplay.textContent = "Error");
   numbers[1] = number.join("");
+  if (operator === divide && numbers[1] === "0") {
+    number = [];
+    numbers = [];
+    return (resultDisplay.textContent = "0 Division");
+  }
   result = operator(...numbers);
-  resultDisplay.textContent = result;
+  resultDisplay.textContent = (+result).toFixed(3);
   numbers = [];
   number = [];
   numbers[0] = result;
